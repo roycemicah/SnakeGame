@@ -15,6 +15,10 @@ import javax.swing.*;
  */
 public class GamePanel extends JPanel implements ActionListener {
 
+    boolean continueGame = false;
+    boolean applePainted = false;
+    boolean gameOver = false;
+
     // Screen dimensions
     static final int SCREEN_WIDTH = 600;
     static final int SCREEN_HEIGHT = 600;
@@ -56,25 +60,59 @@ public class GamePanel extends JPanel implements ActionListener {
 
     }
 
+    public void restartGame() {
+        
+        bodyParts = 6;
+        applesEaten = 0;
+        direction = 'R';
+        running = false;
+        newApple();
+        startGame();
+        
+    }
+
+    public void resetGame() {
+        
+        bodyParts = 6;
+        applesEaten = 0;
+        direction = 'R';
+        running = false;
+        gameOver = false;
+        applePainted = false;
+
+        for (int i = 0; i < bodyParts; i++) {
+            x[i] = 0;
+            y[i] = 0;
+        }
+
+        newApple();
+        
+    }
+
     public void paintComponent(Graphics g) {
 
         super.paintComponent(g);
-        draw(g);
+
+        if (running) {
+            draw(g);
+        } else {
+            
+            if (gameOver) {
+                gameOver(g);
+                if (!applePainted) {
+                    g.setColor(Color.red);
+                    g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE);
+                    applePainted = true;
+                }
+            }
+            
+        }
 
     }
 
     public void draw(Graphics g) {
 
         if (running) {
-            /*
-            Grid Lines
-            
-            for (int i = 0; i < SCREEN_HEIGHT / UNIT_SIZE; i++) {
-                g.setColor(Color.gray);
-                g.drawLine(i * UNIT_SIZE, 0, i * UNIT_SIZE, SCREEN_HEIGHT);
-                g.drawLine(0, i * UNIT_SIZE, SCREEN_WIDTH, i * UNIT_SIZE);
-            }
-             */
 
             g.setColor(Color.red);
             g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE);
@@ -154,7 +192,7 @@ public class GamePanel extends JPanel implements ActionListener {
         }
 
         // check if head touches left border
-        if (x[0] < 0) {
+        if (x[0] < 0 || x[0] >= SCREEN_WIDTH) {
             running = false;
         }
         // right border
@@ -162,7 +200,7 @@ public class GamePanel extends JPanel implements ActionListener {
             running = false;
         }
         // top border
-        if (y[0] < 0) {
+        if (y[0] < 0 || y[0] >= SCREEN_HEIGHT) {
             running = false;
         }
         // bottom border
@@ -172,6 +210,8 @@ public class GamePanel extends JPanel implements ActionListener {
 
         if (!running) {
             timer.stop();
+            gameOver = true;
+            repaint();
         }
 
     }
@@ -188,6 +228,12 @@ public class GamePanel extends JPanel implements ActionListener {
         g.setFont(new Font("Ink Free", Font.BOLD, 40));
         FontMetrics metrics2 = getFontMetrics(g.getFont());
         g.drawString("Game Over", (SCREEN_WIDTH - metrics2.stringWidth("Game Over")) / 2, SCREEN_HEIGHT / 2);
+        
+        //Restart option
+        g.setColor(Color.white);
+        g.setFont(new Font("Ink Free", Font.BOLD, 30));
+        FontMetrics metrics3 = getFontMetrics(g.getFont());
+        g.drawString("Restart? (y/n)", (SCREEN_WIDTH - metrics3.stringWidth("Restart? (y/n)")) / 2, SCREEN_HEIGHT / 2 + 100);
 
     }
 
@@ -198,6 +244,10 @@ public class GamePanel extends JPanel implements ActionListener {
             move();
             checkApple();
             checkCollisions();
+        }
+        
+        if(!running && continueGame) {
+            restartGame();
         }
         repaint();
 
@@ -229,6 +279,20 @@ public class GamePanel extends JPanel implements ActionListener {
                         direction = 'D';
                     }
                     break;
+            }
+            
+            if(!running) {
+                switch(e.getKeyCode()) {
+                    case KeyEvent.VK_Y:
+                        if(gameOver) {
+                            resetGame();
+                            startGame();
+                        }
+                        break;
+                    case KeyEvent.VK_N:
+                        System.exit(0);
+                        break;
+                }
             }
 
         }
