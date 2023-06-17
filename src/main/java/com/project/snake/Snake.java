@@ -4,6 +4,8 @@
  */
 package com.project.snake;
 
+import javax.swing.SwingUtilities;
+
 /**
  *
  * @author roycerabanal
@@ -11,7 +13,7 @@ package com.project.snake;
 public class Snake {
 
     public static void main(String[] args) {
-        new GameFrame();
+        SwingUtilities.invokeLater(GameFrame::new);
     }
 
 }

@@ -18,6 +18,8 @@ public class GamePanel extends JPanel implements ActionListener {
     boolean continueGame = false;
     boolean applePainted = false;
     boolean gameOver = false;
+    boolean paused = false;
+    boolean showPausedText = false;
 
     // Screen dimensions
     static final int SCREEN_WIDTH = 600;
@@ -96,16 +98,24 @@ public class GamePanel extends JPanel implements ActionListener {
         if (running) {
             draw(g);
         } else {
-            
-            if (gameOver) {
-                gameOver(g);
-                if (!applePainted) {
+            gameOver(g);
+            if (!applePainted) {
                     g.setColor(Color.red);
                     g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE);
-                    applePainted = true;
-                }
-            }
-            
+                    applePainted = true;              
+            } 
+        }
+        
+        if(showPausedText) {
+            g.setColor(new Color(0, 0, 0, 150));
+            g.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+            g.setColor(Color.white);
+            g.setFont(new Font("Ink Free", Font.BOLD, 75));
+            FontMetrics metrics = g.getFontMetrics();
+            String pausedText = "PAUSED";
+            int x = (SCREEN_WIDTH - metrics.stringWidth(pausedText)) / 2;
+            int y = SCREEN_HEIGHT / 2;
+            g.drawString(pausedText, x, y);
         }
 
     }
@@ -277,6 +287,21 @@ public class GamePanel extends JPanel implements ActionListener {
                 case KeyEvent.VK_DOWN:
                     if (direction != 'U') {
                         direction = 'D';
+                    }
+                    break;
+                case KeyEvent.VK_SPACE:
+                    if(running) {
+                        if(!paused) {
+                            timer.stop();
+                            paused = true;
+                            showPausedText = true;
+                        } else {
+                            paused = false;
+                            showPausedText = false;
+                            timer.start();
+                            move();
+                        }
+                        repaint();
                     }
                     break;
             }
